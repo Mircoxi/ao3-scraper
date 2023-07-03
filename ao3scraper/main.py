@@ -1,7 +1,11 @@
+import socket
+
 import requests
 from bs4 import BeautifulSoup
 import time
-from ao3scraper.config import AO3_USERNAME, AO3_PASSWORD
+
+from config import AO3_USERNAME, AO3_PASSWORD
+import metrics as metrics
 
 
 def get_stats(username, password):
@@ -9,7 +13,7 @@ def get_stats(username, password):
     login_url = 'https://archiveofourown.org/users/login'
     '''
     The stats URL deliberately has specific parameters set to format data predictably. 
-    
+
     The following assumptions are made:
     - Latest fics are more interesting stats-wise than older ones, which have likely tapered off; 
     - We want to get stats for ALL fics we've written;
@@ -33,22 +37,35 @@ def get_stats(username, password):
         # TODO: Proper login handler checks.
         stats_request = session.get(stats_url)
         stat_soup = BeautifulSoup(stats_request.text, features='html.parser')
-        stat_box = stat_soup.find('li', attrs= {'class': 'fandom listbox group'})
+        stat_box = stat_soup.find('li', attrs={'class': 'fandom listbox group'})
         # class=None is a required check; there's a nested one with a "stats" class that throws this off otherwise.
         stat_items = stat_box.findChildren('dl', attrs={'class': None})
         for item in stat_items:
             # These are the actual works, start processing them.
             title = item.find('a').text
             fandom = item.find('span', attrs={'class': 'fandom'}).text.replace('(', '').replace(')', '')
+            work_label = title + ' (' + fandom + ')'
+            metrics.work_wordcount.labels(work_title=work_label).set(int(item.find('span', attrs={'class': 'words'}).text.replace('(', '').replace('words)', '').replace(',', '')))
+
             child_stats = item.find('dl')
-            subscriptions = int(child_stats.find('dd', attrs={'class': 'subscriptions'}).text)
-            hits = int(child_stats.find('dd', attrs={'class': 'hits'}).text.replace(',', ''))
-            kudos = int(child_stats.find('dd', attrs={'class': 'kudos'}).text)
-            comment_threads = int(child_stats.find('dd', attrs={'class': 'comments'}).text)
-            bookmarks = int(child_stats.find('dd', attrs={'class': 'bookmarks'}).text)
-            print(title + ' (' + fandom + ') - ' + str(subscriptions) + ' subs, ' + str(hits) + ' hits')
+            metrics.work_subs.labels(work_title=work_label).set(int(child_stats.find('dd', attrs={'class': 'subscriptions'}).text.replace(',', '')))
+            metrics.work_hits.labels(work_title=work_label).set(int(child_stats.find('dd', attrs={'class': 'hits'}).text.replace(',', '')))
+            metrics.work_kudos.labels(work_title=work_label).set(int(child_stats.find('dd', attrs={'class': 'kudos'}).text.replace(',', '')))
+            metrics.work_comment_threads.labels(work_title=work_label).set(int(child_stats.find('dd', attrs={'class': 'comments'}).text.replace(',', '')))
+            metrics.work_bookmarks.labels(work_title=work_label).set(int(child_stats.find('dd', attrs={'class': 'bookmarks'}).text.replace(',', '')))
         # Get the global stats too.
         global_statbox = stat_soup.find('dl', attrs={'class': 'statistics meta group'})
-        print(global_statbox.find('dd', attrs={'class': 'user subscriptions'}).text + ' user subs')
+        metrics.user_threads.set(int(global_statbox.find('dd', attrs={'class': 'comment thread count'}).text.replace(',', '')))
+        metrics.user_wordcount.set(int(global_statbox.find('dd', attrs={'class': 'words'}).text.replace(',', '')))
+        metrics.user_hits.set(int(global_statbox.find('dd', attrs={'class': 'hits'}).text.replace(',', '')))
+        metrics.user_subs.set(int(global_statbox.find('dd', attrs={'class': 'subscriptions'}).text.replace(',', '')))
+        metrics.user_kudos.set(int(global_statbox.find('dd', attrs={'class': 'kudos'}).text.replace(',', '')))
+        metrics.user_bookmarks.set(int(global_statbox.find('dd', attrs={'class': 'bookmarks'}).text.replace(',', '')))
+        metrics.user_global_subs.set(int(global_statbox.find('dd', attrs={'class': 'user subscriptions'}).text.replace(',', '')))
+        metrics.push_metrics()
 
-get_stats(AO3_USERNAME, AO3_PASSWORD)
+if __name__ == "__main__":
+    while True:
+        get_stats(AO3_USERNAME, AO3_PASSWORD)
+        print("Got stats, sleeping...")
+        time.sleep(1800)
