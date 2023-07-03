@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import time
-from ao3scraper.config import USERNAME, PASSWORD
+from ao3scraper.config import AO3_USERNAME, AO3_PASSWORD
 
 
 def get_stats(username, password):
@@ -51,4 +51,4 @@ def get_stats(username, password):
         global_statbox = stat_soup.find('dl', attrs={'class': 'statistics meta group'})
         print(global_statbox.find('dd', attrs={'class': 'user subscriptions'}).text + ' user subs')
 
-get_stats(USERNAME, PASSWORD)
+get_stats(AO3_USERNAME, AO3_PASSWORD)

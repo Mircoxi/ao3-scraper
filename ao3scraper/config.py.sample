@@ -1,1 +1,4 @@
 import os
+
+AO3_USERNAME = os.environ.get("AO3_USERNAME", "")
+AO3_PASSWORD = os.environ.get("AO3_PASSWORD", "")
