@@ -39,5 +39,5 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }},ghcr.io/mircoxi/ao3_scraper:latest
+          tags: ghcr.io/mircoxi/ao3_scraper:latest
           labels: ${{ steps.meta.outputs.labels }}
