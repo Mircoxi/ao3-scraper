@@ -8,7 +8,7 @@ import ao3scraper.metrics as metrics
 
 AO3_USERNAME = os.environ.get("AO3_USERNAME", "")
 AO3_PASSWORD = os.environ.get("AO3_PASSWORD", "")
-
+DEBUG_MODE = bool(os.environ.get("DEBUG_MODE", 0))
 
 def get_stats(username, password):
     base_url = 'https://archiveofourown.org/'
@@ -72,11 +72,18 @@ def get_stats(username, password):
 
 
 if __name__ == "__main__":
-    print("DEBUG: Starting.")
+    # Keep track of whether the last result was a failure or not, so we can let the user know.
+    previous_error = False
+    if DEBUG_MODE is True:
+        print("DEBUG: Starting.")
     while True:
         try:
             get_stats(AO3_USERNAME, AO3_PASSWORD)
-            print("Got stats! Sleeping 30 minutes...")
+            if previous_error is True:
+                print("AO3 back up! Got stats and resuming normal functions.")
+                previous_error = False
+            if DEBUG_MODE is True:
+                print("Got stats! Sleeping 30 minutes...")
             time.sleep(1800)
         except RuntimeError:
             # Throw an error and quit.
@@ -85,6 +92,7 @@ if __name__ == "__main__":
         except requests.exceptions.RequestException:
             # AO3 likely experiencing issues. Sleep, but not as long so that stats update in a timely
             # fashion when it comes back.
-            print("AO3 is experiencing issues! Backing off for a while...")
+            print("AO3 is experiencing issues! Backing off for a while... We'll check again in 10 minutes.")
+            previous_error = True
             time.sleep(600)
 
