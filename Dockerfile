@@ -20,4 +20,4 @@ EXPOSE 8000
 # Set user
 USER scraper
 
-CMD python3 ao3scraper/main.py
+CMD python3 -u ao3scraper/main.py

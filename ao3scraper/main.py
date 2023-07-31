@@ -76,6 +76,7 @@ if __name__ == "__main__":
     while True:
         try:
             get_stats(AO3_USERNAME, AO3_PASSWORD)
+            print("Got stats! Sleeping 30 minutes...")
             time.sleep(1800)
         except RuntimeError:
             # Throw an error and quit.
@@ -84,5 +85,6 @@ if __name__ == "__main__":
         except requests.exceptions.RequestException:
             # AO3 likely experiencing issues. Sleep, but not as long so that stats update in a timely
             # fashion when it comes back.
+            print("AO3 is experiencing issues! Backing off for a while...")
             time.sleep(600)
 
