@@ -11,7 +11,6 @@ AO3_PASSWORD = os.environ.get("AO3_PASSWORD", "")
 
 
 def get_stats(username, password):
-    print(username)
     base_url = 'https://archiveofourown.org/'
     login_url = 'https://archiveofourown.org/users/login'
     '''
@@ -30,15 +29,20 @@ def get_stats(username, password):
         auth_token = login_soup.find('input', {'name': 'authenticity_token'})['value']
         time.sleep(2)  # To be nice...
         # Logging in is just a POST request. We can discard the old request now we have the CSRF token.
-        debug = session.post(login_url, data={
+        login_attempt = session.post(login_url, data={
             'authenticity_token': auth_token,
             'user[login]': username,
             'user[password]': password,
         })
         time.sleep(2)  # Let it sit, in case AO3 is under load.
-        # Unfortunately, AO3 doesn't return status codes, so...
-        # TODO: Proper login handler checks.
+        if login_attempt.status_code != 200:
+            raise requests.exceptions.RequestException("AO3 is experiencing issues!")
+        if 'Please try again' in login_attempt.text:
+            raise RuntimeError('Error logging in - wrong username and password.')
+
         stats_request = session.get(stats_url)
+        if stats_request.status_code != 200:
+            raise requests.exceptions.RequestException("AO3 is experiencing issues!")
         stat_soup = BeautifulSoup(stats_request.text, features='html.parser')
         stat_box = stat_soup.find('li', attrs={'class': 'fandom listbox group'})
         # class=None is a required check; there's a nested one with a "stats" class that throws this off otherwise.
@@ -66,8 +70,19 @@ def get_stats(username, password):
         metrics.user_bookmarks.set(int(global_statbox.find('dd', attrs={'class': 'bookmarks'}).text.replace(',', '')))
         metrics.user_global_subs.set(int(global_statbox.find('dd', attrs={'class': 'user subscriptions'}).text.replace(',', '')))
 
+
 if __name__ == "__main__":
     print("DEBUG: Starting.")
     while True:
-        get_stats(AO3_USERNAME, AO3_PASSWORD)
-        time.sleep(1800)
+        try:
+            get_stats(AO3_USERNAME, AO3_PASSWORD)
+            time.sleep(1800)
+        except RuntimeError:
+            # Throw an error and quit.
+            print("Your login credentials are probably wrong. Check them again!")
+            exit(1)
+        except requests.exceptions.RequestException:
+            # AO3 likely experiencing issues. Sleep, but not as long so that stats update in a timely
+            # fashion when it comes back.
+            time.sleep(600)
+
