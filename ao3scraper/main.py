@@ -4,8 +4,8 @@ import requests
 from bs4 import BeautifulSoup
 import time
 
-from config import AO3_USERNAME, AO3_PASSWORD
-import metrics as metrics
+from ao3scraper.config import AO3_USERNAME, AO3_PASSWORD
+import ao3scraper.metrics as metrics
 
 def get_stats(username, password):
     print(username)
