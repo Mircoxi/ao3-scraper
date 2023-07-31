@@ -7,8 +7,8 @@ import time
 from config import AO3_USERNAME, AO3_PASSWORD
 import metrics as metrics
 
-
 def get_stats(username, password):
+    print(username)
     base_url = 'https://archiveofourown.org/'
     login_url = 'https://archiveofourown.org/users/login'
     '''
@@ -21,13 +21,13 @@ def get_stats(username, password):
     '''
     stats_url = 'https://archiveofourown.org/users/' + username + '/stats?flat_view=true&sort_column=date&sort_direction=DESC&year=All+Years'
     with requests.Session() as session:
-        request = session.get(base_url, allow_redirects=True)
+        request = session.get(login_url, allow_redirects=True)
         login_soup = BeautifulSoup(request.text, features='html.parser')
         # AO3 has a CSRF token for logins. We should find this first before we try to log in.
         auth_token = login_soup.find('input', {'name': 'authenticity_token'})['value']
         time.sleep(2)  # To be nice...
         # Logging in is just a POST request. We can discard the old request now we have the CSRF token.
-        request = session.post(login_url, data={
+        debug = session.post(login_url, data={
             'authenticity_token': auth_token,
             'user[login]': username,
             'user[password]': password,
@@ -62,10 +62,9 @@ def get_stats(username, password):
         metrics.user_kudos.set(int(global_statbox.find('dd', attrs={'class': 'kudos'}).text.replace(',', '')))
         metrics.user_bookmarks.set(int(global_statbox.find('dd', attrs={'class': 'bookmarks'}).text.replace(',', '')))
         metrics.user_global_subs.set(int(global_statbox.find('dd', attrs={'class': 'user subscriptions'}).text.replace(',', '')))
-        metrics.push_metrics()
 
 if __name__ == "__main__":
+
     while True:
         get_stats(AO3_USERNAME, AO3_PASSWORD)
-        print("Got stats, sleeping...")
         time.sleep(1800)
