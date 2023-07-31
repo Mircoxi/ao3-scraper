@@ -3,9 +3,12 @@ import socket
 import requests
 from bs4 import BeautifulSoup
 import time
-
-from ao3scraper.config import AO3_USERNAME, AO3_PASSWORD
+import os
 import ao3scraper.metrics as metrics
+
+AO3_USERNAME = os.environ.get("AO3_USERNAME", "")
+AO3_PASSWORD = os.environ.get("AO3_PASSWORD", "")
+
 
 def get_stats(username, password):
     print(username)
