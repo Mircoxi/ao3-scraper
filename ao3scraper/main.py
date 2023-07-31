@@ -52,23 +52,23 @@ def get_stats(username, password):
             title = item.find('a').text
             fandom = item.find('span', attrs={'class': 'fandom'}).text.replace('(', '').replace(')', '')
             work_label = title + ' (' + fandom + ')'
-            metrics.work_wordcount.labels(work_title=work_label).set(int(item.find('span', attrs={'class': 'words'}).text.replace('(', '').replace('words)', '').replace(',', '')))
+            metrics.ao3_work_wordcount.labels(work_title=work_label).set(int(item.find('span', attrs={'class': 'words'}).text.replace('(', '').replace('words)', '').replace(',', '')))
 
             child_stats = item.find('dl')
-            metrics.work_subs.labels(work_title=work_label).set(int(child_stats.find('dd', attrs={'class': 'subscriptions'}).text.replace(',', '')))
-            metrics.work_hits.labels(work_title=work_label).set(int(child_stats.find('dd', attrs={'class': 'hits'}).text.replace(',', '')))
-            metrics.work_kudos.labels(work_title=work_label).set(int(child_stats.find('dd', attrs={'class': 'kudos'}).text.replace(',', '')))
-            metrics.work_comment_threads.labels(work_title=work_label).set(int(child_stats.find('dd', attrs={'class': 'comments'}).text.replace(',', '')))
-            metrics.work_bookmarks.labels(work_title=work_label).set(int(child_stats.find('dd', attrs={'class': 'bookmarks'}).text.replace(',', '')))
+            metrics.ao3_work_subs.labels(work_title=work_label).set(int(child_stats.find('dd', attrs={'class': 'subscriptions'}).text.replace(',', '')))
+            metrics.ao3_work_hits.labels(work_title=work_label).set(int(child_stats.find('dd', attrs={'class': 'hits'}).text.replace(',', '')))
+            metrics.ao3_work_kudos.labels(work_title=work_label).set(int(child_stats.find('dd', attrs={'class': 'kudos'}).text.replace(',', '')))
+            metrics.ao3_work_comment_threads.labels(work_title=work_label).set(int(child_stats.find('dd', attrs={'class': 'comments'}).text.replace(',', '')))
+            metrics.ao3_work_bookmarks.labels(work_title=work_label).set(int(child_stats.find('dd', attrs={'class': 'bookmarks'}).text.replace(',', '')))
         # Get the global stats too.
         global_statbox = stat_soup.find('dl', attrs={'class': 'statistics meta group'})
-        metrics.user_threads.set(int(global_statbox.find('dd', attrs={'class': 'comment thread count'}).text.replace(',', '')))
-        metrics.user_wordcount.set(int(global_statbox.find('dd', attrs={'class': 'words'}).text.replace(',', '')))
-        metrics.user_hits.set(int(global_statbox.find('dd', attrs={'class': 'hits'}).text.replace(',', '')))
-        metrics.user_subs.set(int(global_statbox.find('dd', attrs={'class': 'subscriptions'}).text.replace(',', '')))
-        metrics.user_kudos.set(int(global_statbox.find('dd', attrs={'class': 'kudos'}).text.replace(',', '')))
-        metrics.user_bookmarks.set(int(global_statbox.find('dd', attrs={'class': 'bookmarks'}).text.replace(',', '')))
-        metrics.user_global_subs.set(int(global_statbox.find('dd', attrs={'class': 'user subscriptions'}).text.replace(',', '')))
+        metrics.ao3_user_threads.set(int(global_statbox.find('dd', attrs={'class': 'comment thread count'}).text.replace(',', '')))
+        metrics.ao3_user_wordcount.set(int(global_statbox.find('dd', attrs={'class': 'words'}).text.replace(',', '')))
+        metrics.ao3_user_hits.set(int(global_statbox.find('dd', attrs={'class': 'hits'}).text.replace(',', '')))
+        #metrics.user_subs.set(int(global_statbox.find('dd', attrs={'class': 'subscriptions'}).text.replace(',', '')))
+        metrics.ao3_user_kudos.set(int(global_statbox.find('dd', attrs={'class': 'kudos'}).text.replace(',', '')))
+        metrics.ao3_user_bookmarks.set(int(global_statbox.find('dd', attrs={'class': 'bookmarks'}).text.replace(',', '')))
+        metrics.ao3_user_global_subs.set(int(global_statbox.find('dd', attrs={'class': 'user subscriptions'}).text.replace(',', '')))
 
 
 if __name__ == "__main__":
