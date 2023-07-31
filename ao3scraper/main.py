@@ -64,7 +64,7 @@ def get_stats(username, password):
         metrics.user_global_subs.set(int(global_statbox.find('dd', attrs={'class': 'user subscriptions'}).text.replace(',', '')))
 
 if __name__ == "__main__":
-
+    print("DEBUG: Starting.")
     while True:
         get_stats(AO3_USERNAME, AO3_PASSWORD)
         time.sleep(1800)
