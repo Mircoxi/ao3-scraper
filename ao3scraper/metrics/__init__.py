@@ -4,7 +4,10 @@ from prometheus_client import CollectorRegistry, Gauge, Summary, Histogram, push
 from prometheus_client import start_http_server
 
 start_http_server(8000)
-# Declare metric categories. Gauges are used bcause the values can go up as well as down.
+
+# Declare metric categories. Gauges are used bcause some values can go up as well as down;
+# for example a user unsubscribes, unbookmarks, etc.
+
 registry = CollectorRegistry()
 ao3_work_hits = Gauge('ao3_work_hits', 'Hits', ['work_title'])
 ao3_work_subs = Gauge('ao3_work_subscriptions', 'Subscriptions', ['work_title'])
@@ -12,7 +15,10 @@ ao3_work_kudos = Gauge('ao3_work_kudos', 'Kudos', ['work_title'])
 ao3_work_comment_threads = Gauge('ao3_work_comments', 'Comment Threads', ['work_title'])
 ao3_work_bookmarks = Gauge('ao3_work_bookmarks', 'Bookmarks', ['work_title'])
 ao3_work_wordcount = Gauge('ao3_work_wordcount', 'Word Count', ['work_title'])
-# Global user metrics
+
+# =========================
+# == GLOBAL USER METRICS ==
+# =========================
 
 # ao3_user_subs = Gauge('user_subscriptions', 'Global Subscriptions')  # Removed because it gets the wrong stat.
 ao3_user_kudos = Gauge('ao3_user_kudos', 'Global Kudos')
