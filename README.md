@@ -10,6 +10,8 @@ AO3 only updates your stats every 30 minutes, so the script will only check on t
 
 The script only scrapes basic stats, to remain completely unopinionated on what's important, or how to present it. See below for the metrics exposed!
 
+Your login details are only ever used for the login endpoint on AO3. Please feel free to verify this in the script.
+
 ## Running it
 
 This can be run in one of two ways - with Docker, or standalone. In either case, a Prometheus metrics endpoint is exposed, so you'll need Prometheus, and probaly Grafana if you want to make the results look pretty. 
@@ -29,9 +31,9 @@ To get it going, pull the container from ghcr:
 
 Run it with the following:
 
-`docker run --name ao3-exporter --p 8000:8000 --dns 1.0.0.1 --dns 1.1.1.1 ghcr.io/mircoxi/ao3-stats-exporter:latest`
+`docker run --name ao3-exporter --env AO3_USERNAME=my_username --env AO3_PASSWORD=supersecurepassword --p 8000:8000 --dns 1.0.0.1 --dns 1.1.1.1 ghcr.io/mircoxi/ao3-stats-exporter:latest`
 
-Add the container to your Prometheus config. The default scrape interval is fine, though data will only update every 30 minutes as per AO3's own update interval. The metrics endpoint isn't on a path, and runs on port 8000.
+Add the container to your Prometheus config. The default scrape interval is fine, though data will only update every 30 minutes as per AO3's own update interval. The metrics endpoint isn't on a path, and runs on port 8000. In this command, DNS entries are provided to give the container the ability to resolve AO3's IP address - 1.0.0.1 and 1.1.1.1 are Cloudflare's resolver, but you may want to use 8.8.8.8 and 8.4.4.8 instead if you prefer Google. Advanced users will know if they're using a custom DNS, and can substitute that in as needed. 
 
 ### Standalone
 
