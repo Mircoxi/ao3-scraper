@@ -55,7 +55,11 @@ def get_stats(username, password):
             metrics.ao3_work_wordcount.labels(work_title=work_label).set(int(item.find('span', attrs={'class': 'words'}).text.replace('(', '').replace('words)', '').replace(',', '')))
 
             child_stats = item.find('dl')
-            metrics.ao3_work_subs.labels(work_title=work_label).set(int(child_stats.find('dd', attrs={'class': 'subscriptions'}).text.replace(',', '')))
+            try:
+                metrics.ao3_work_subs.labels(work_title=work_label).set(int(child_stats.find('dd', attrs={'class': 'subscriptions'}).text.replace(',', '')))
+            except AttributeError:
+                # For when a work doesn't have any subscriptions yet.
+                metrics.ao3_work_subs.labels(work_title=work_label).set(0)
             metrics.ao3_work_hits.labels(work_title=work_label).set(int(child_stats.find('dd', attrs={'class': 'hits'}).text.replace(',', '')))
             metrics.ao3_work_kudos.labels(work_title=work_label).set(int(child_stats.find('dd', attrs={'class': 'kudos'}).text.replace(',', '')))
             metrics.ao3_work_comment_threads.labels(work_title=work_label).set(int(child_stats.find('dd', attrs={'class': 'comments'}).text.replace(',', '')))
