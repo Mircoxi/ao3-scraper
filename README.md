@@ -1,5 +1,7 @@
 # AO3 Stats Exporter
 
+## What's this?
+
 This is a simple Python app designed to act as a Prometheus endpoint for collecting stats about your fics on AO3. For most people, the on-site stats page is fine - but if you're interested in seeing how your stuff is doing over time, you may find this useful.
 
 ## How it works

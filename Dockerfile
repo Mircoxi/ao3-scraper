@@ -1,4 +1,4 @@
-FROM python:3.11-bullseye
+FROM python:3.12-bullseye
 
 # Create limited user
 RUN groupadd scraper && useradd --create-home --home-dir /home/scraper -g scraper scraper
